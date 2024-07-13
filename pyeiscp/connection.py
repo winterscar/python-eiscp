@@ -338,18 +338,21 @@ class Connection:
     def _increase_retry_interval(self):
         self._retry_interval = min(self._max_retry_interval, 1.5 * self._retry_interval)
 
+    async def _connect(self):
+        self.log.debug(
+            "Connecting to Network Receiver at %s:%d", self.host, self.port
+        )
+        await self._loop.create_connection(
+            lambda: self.protocol, self.host, self.port
+        )
+
     async def _reconnect(self):
         while True:
             try:
                 if self._halted:
-                    await asyncio.sleep(2, loop=self._loop)
+                    await asyncio.sleep(2)
                 else:
-                    self.log.debug(
-                        "Connecting to Network Receiver at %s:%d", self.host, self.port
-                    )
-                    await self._loop.create_connection(
-                        lambda: self.protocol, self.host, self.port
-                    )
+                    await self._connect()
                     self._reset_retry_interval()
                     return
 
@@ -366,12 +369,15 @@ class Connection:
                 self._increase_retry_interval()
                 interval = self._get_retry_interval()
                 self.log.debug("Connecting failed, retrying in %i seconds", interval)
-                await asyncio.sleep(interval, loop=self._loop)
+                await asyncio.sleep(interval)
 
-    async def connect(self):
+    async def connect(self, retry=True):
         """Establish the AVR device connection"""
         if not self.protocol.transport:
-            await self._reconnect()
+            if retry:
+                await self._reconnect()
+            else:
+                await self._connect()
 
     def close(self):
         """Close the AVR device connection and don't try to reconnect."""
