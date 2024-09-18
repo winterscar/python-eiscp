@@ -85,7 +85,7 @@ class eISCPPacket(object):
         """Parse the eISCP package given by ``bytes``.
         """
         h = cls.parse_header(bytes[:16])
-        data = bytes[h.header_size : h.header_size + h.data_size].decode()
+        data = bytes[h.header_size : h.header_size + h.data_size].decode(errors='replace')
         assert len(data) == h.data_size
         return data
 
