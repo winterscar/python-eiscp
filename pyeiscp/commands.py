@@ -5,7 +5,7 @@
 #  at 2019-06-16 18:16:40.906934
 
 from collections import OrderedDict
-from .utils import ValueRange
+from .utils import ValueRange, RawMessage
 
 COMMANDS = OrderedDict([('main', OrderedDict([('PWR', {'values': OrderedDict([('00', {'name': ('standby',
       'off'),
@@ -17,6 +17,20 @@ COMMANDS = OrderedDict([('main', OrderedDict([('PWR', {'values': OrderedDict([('
      'description': 'gets the System Power Status'})]),
    'name': 'system-power',
    'description': 'System Power Command'}),
+  ('MDI', {
+    'values': OrderedDict([
+      ('QSTN', {'name': 'query', 'description': 'query the multiroom zones status'}),
+      ]),
+    'name': 'multiroom-status',
+    'description': 'Get details on the multiroom zones this device is a part of'
+  }),
+  ('MGS', {
+   'values' : OrderedDict([
+      ('<xml>', {'name': '<xml>', 'description': 'some xml formatted message'})
+      ]),
+   'name': 'raw-message',
+   'description': 'Send a pre-formatted message to the receiver, Onkyo devices use this for setting up multiroom audio (flareconnect)'
+   }),
   ('AMT', {'values': OrderedDict([('00', {'name': 'off',
      'description': 'sets Audio Muting Off'}),
     ('01', {'name': 'on', 'description': 'sets Audio Muting On'}),
@@ -2343,6 +2357,8 @@ COMMAND_MAPPINGS = {'zone3': {'tone': 'TN3',
   'source': 'SLI',
   'battery-charge-status': 'BCS',
   'system-power': 'PWR',
+  'multiroom-status': 'MDI',
+  'raw-message': 'MGS',
   'dialog-control-enabled': 'DCE',
   'current-folder-status-no': 'CFS',
   'xm-category': 'XCT',
@@ -3428,6 +3444,8 @@ VALUE_MAPPINGS = {'zone3': {'PW3': {'standby': '00', 'on': '01', 'query': 'QSTN'
    'b-xx': 'B{xx}',
    'query': 'QSTN',
    't-xx': 'T{xx}'},
+   'MDI': {'query': 'QSTN'},
+   'MGS': {RawMessage('<xml>'): '<xml>'},
   'PNR': {'on': '01', 'toggle': 'TG', 'off': '00', 'query': 'QSTN'},
   'MCC': {'query': 'QSTN', '00': '00', '01': '01'},
   'ARC': {'auto': '01', 'off': '00', 'up': 'UP', 'query': 'QSTN'},

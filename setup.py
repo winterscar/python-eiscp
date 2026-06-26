@@ -33,5 +33,5 @@ setup(
         "netifaces",
     ],
     zip_safe=True,
-    entry_points={"console_scripts": ["eiscp_monitor = pyeiscp.tools:monitor",]},
+    entry_points={"console_scripts": ["eiscp_monitor = pyeiscp.tools:monitor","eiscp_sender = pyeiscp.tools:sender",]},
 )

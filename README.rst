@@ -75,6 +75,30 @@ your receiver and its configured port:
 
    eiscp_monitor --host 10.0.0.100 --port 60128
 
+A secondary command line tool allows for easy sending of commands to
+the receiver. For example, to query the multiroom audio status ("groups")
+on an Onkyo receiver:
+
+::
+
+   eiscp_sender --host 10.0.0.100 'multiroom-status query'
+
+The eiscp_sender command can also be used to enable/disable multiroom audio
+aka (flareconnect). For this you will need the mac address of the secondary
+device, you can obtain this from the <deviceid> field returned from the
+'multiroom-status query' command. To start a multiroom audio group with 
+10.0.0.100 (0123456DDEEFF) as the host, and 012356AABBCC as secondary device:
+
+::
+
+   eiscp_sender --host 10.0.0.100 'raw-message=<mgs zone="1"><groupid>1</groupid><maxdelay>500</maxdelay><devices><device id="012356AABBCC" zoneid="1"/><device id="0123456DDEEFF" zoneid="1"/></devices></mgs>'
+
+To stop this grouping:
+
+::
+
+   eiscp_sender --host 10.0.0.100 'raw-message=<mgs zone="1"><groupid>0</groupid></mgs>'
+
 
 Credits
 -------

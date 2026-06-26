@@ -5,7 +5,7 @@ import time
 import struct
 import re
 from pyeiscp import commands
-from pyeiscp.utils import ValueRange
+from pyeiscp.utils import ValueRange, RawMessage
 from collections import namedtuple
 
 __all__ = "AVR"
@@ -177,7 +177,7 @@ def command_to_iscp(command, arguments=None, zone=None):
     if arguments is None and zone is None:
         # Separating command and args with colon allows multiple args
         if ":" in command or "=" in command:
-            base, arguments = re.split(r"[:=]", command, 1)
+            base, fullarguments = re.split(r"[:=]", command, 1)
             parts = [norm(c) for c in re.split(command_sep, base)]
             if len(parts) == 2:
                 zone, command = parts
@@ -185,7 +185,7 @@ def command_to_iscp(command, arguments=None, zone=None):
                 zone = default_zone
                 command = parts[0]
             # Split arguments by comma or space
-            arguments = [norm(a) for a in re.split(r"[ ,]", arguments)]
+            arguments = [norm(a) for a in re.split(r"[ ,]", fullarguments)]
         else:
             # Split command part by space or dot
             parts = [norm(c) for c in re.split(command_sep, command)]
@@ -229,6 +229,14 @@ def command_to_iscp(command, arguments=None, zone=None):
                         # We need to send the format "FF", hex() gives us 0xff
                         value = hex(int(argument))[2:].zfill(2).upper()
                         break
+            else:
+                if isinstance(possible_arg, RawMessage):
+                    # This is a raw string message that we should just pass as-is to the receiver
+                    if fullarguments:
+                        value = fullarguments
+                    else:
+                        value = argument
+                    break
 
             # TODO: patterns not yet supported
         else:
@@ -338,7 +346,8 @@ class AVR(asyncio.Protocol):
             self.log.error(f"Invalid message. {error}")
             return
 
-        self.log.debug("> %s", command)
+        self.log.debug("> command: %s", command)
+        self.log.debug("> iscp_message: %s", iscp_message)
         try:
             self.transport.write(command_to_packet(iscp_message))
         except:
